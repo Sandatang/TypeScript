@@ -1,0 +1,16 @@
+.blockCenter{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flexCenter{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+}
+
+.cursorPointer{
+    cursor: pointer !important;
+}
