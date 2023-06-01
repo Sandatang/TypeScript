@@ -1,15 +1,24 @@
+import { ConflicError, UnauthorizedError } from "../http-errors/http-error"
 import { Note } from "../models/notes"
 
-async function fetchData(input: RequestInfo, init?: RequestInit) {
+export async function fetchData(input: RequestInfo, init?: RequestInit) {
     const response = await fetch(input,init)
     if(response.ok){
         return response
     }else{
         const errorBody = await response.json()
         const errorMessage = errorBody.error
-        throw Error(errorMessage)
+
+        if(response.status === 401){
+            throw new UnauthorizedError(errorMessage)
+        }else if (response.status === 409) {
+            throw new ConflicError(errorMessage)
+        }else{
+            throw Error(errorMessage)
+        }
     }
 }
+
 
 export async function fetchNotes(): Promise<Note[]> {
     const response = await fetchData("/api/notes", { method: "GET" })

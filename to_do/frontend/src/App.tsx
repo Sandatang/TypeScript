@@ -1,83 +1,73 @@
-import React, { useEffect, useState } from 'react';
-import {Note as NoteModel } from './models/notes';
-import Note from './components/Note';
-import { Button, Col, Container, Row } from "react-bootstrap";
-import style from "./styles/NotePage.module.css"
-import styleUtils from "./styles/utils.module.css"
-import * as NoteApi from "./network/notes_api"
-import {FaPlus} from 'react-icons/fa'
-import AddEditForm from './components/AddEditFormDialog';
-
+import { useEffect, useState } from "react";
+import { Container } from "react-bootstrap";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Home from "./Pages/Home";
+import LoginModalForm from './components/LoginModalForm';
+import NavBar from './components/NavBar';
+import SignUpModalForm from './components/SignUpModalForm';
+import { User } from "./models/users";
+import * as UsersApi from "./network/users_api";
+import pageStyle from "./styles/App.module.css"
 function App() {
-  const [notes, setNotes] = useState<NoteModel[]>([])
 
-  const [showAddFormDialog, setShowAddFormDialog] = useState(false)
-  const [noteToEdit, setNoteToEdit] = useState<NoteModel|null>(null)
+  const [loggedInUser, setLoggedInUser] = useState<User | null>(null)
+
+  const [showSignUpModel, setShowSignUpModel] = useState(false)
+  const [showLoginUpModel, setshowLoginUpModel] = useState(false)
+
   useEffect(() => {
-    async function loadNotes() {
+    async function fetchLoggedInUser() {
       try {
-        const notes = await NoteApi.fetchNotes()
-        setNotes(notes)
+        const user = await UsersApi.getLoggedInUsers()
+        setLoggedInUser(user)
       } catch (error) {
         console.error(error)
-        alert(error)
       }
     }
-    loadNotes()
+    fetchLoggedInUser()
   }, [])
 
-  async function deleteNote(note: NoteModel) {
-    try {
-      await NoteApi.deleteNotes(note._id)
-      setNotes(notes.filter(noteExist  => noteExist._id !== note._id))
-    } catch (error) {
-      console.error(error)
-      alert(error)
-    }
-  }
   return (
-    <Container>
-      <Button 
-        className={`mb-4 ${styleUtils.blockCenter} ${styleUtils.flexCenter}`}
-        onClick={() => setShowAddFormDialog(true)}>
-        <FaPlus/>
-        Add note
-      </Button>
-      <Row xs={1} md={2} xl={3} className='g-4'>
-      {notes.map(note => {
-        return (
-          <Col key={note._id} >
-            <Note 
-              note={note}
-              className={style.note}
-              onDeleteNoteCliked={deleteNote}
-              onNoteClicked={setNoteToEdit}
+    
+    <BrowserRouter>
+    <div>
+      <NavBar
+        loggedInUser={loggedInUser}
+        onSignUpClicked={() => setShowSignUpModel(true)}
+        onLogInClicked={() => setshowLoginUpModel(true)}
+        onLogOutClicked={() => setLoggedInUser(null)}
+      />
+        <Container className={pageStyle.pageContainer}>
+          <Routes>
+            <Route 
+              path="/"
+              element={<Home loggedInUser={loggedInUser}/>}
             />
-          </Col>
-        )
-      })}
-      </Row>
-      {showAddFormDialog &&
-        <AddEditForm 
-          onDismiss={() => setShowAddFormDialog(false)}
-          onSavedNote={(newNote) => {
-            setNotes([...notes, newNote])
-            setShowAddFormDialog(false)
+          </Routes>
+        </Container>
+      {
+        showSignUpModel &&
+        <SignUpModalForm
+          onDismiss={() => setShowSignUpModel(false)}
+          onSignUpSuccessfull={(user) => {
+            setLoggedInUser(user)
+            setShowSignUpModel(false)
           }}
         />
       }
 
-      {noteToEdit &&
-        <AddEditForm 
-          noteToEdit={noteToEdit}
-          onDismiss={() => setNoteToEdit(null)}
-          onSavedNote={(updateNote) => {
-            setNotes(notes.map(existingNote => existingNote._id === updateNote._id ? updateNote: existingNote))
-            setNoteToEdit(null)
+      {
+        showLoginUpModel &&
+        <LoginModalForm
+          onDismiss={() => setshowLoginUpModel(false)}
+          onLoginSuccesful={(user) => {
+            setLoggedInUser(user)
+            setshowLoginUpModel(false)
           }}
         />
       }
-    </Container>
+    </div>
+    </BrowserRouter>
   );
 }
 

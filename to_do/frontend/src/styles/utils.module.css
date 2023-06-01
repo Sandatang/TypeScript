@@ -14,3 +14,7 @@
 .cursorPointer{
     cursor: pointer !important;
 }
+
+.width100{
+    width: 100%;
+}

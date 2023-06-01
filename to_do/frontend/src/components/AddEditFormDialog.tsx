@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { NoteInput } from "../network/notes_api";
 import * as NoteApi from "../network/notes_api"
 import { Note } from "../models/notes";
+import TextFormFields from "./fields/TextFormFields";
 
 interface AddEditFormProps {
     noteToEdit?: Note,
@@ -44,31 +45,24 @@ const AddEditForm = ({ noteToEdit, onDismiss,onSavedNote}: AddEditFormProps) => 
 
             <Modal.Body>
                 <Form id="addEditFormDialog" onSubmit={handleSubmit(onSubmit)}>
-                    <Form.Group  className="mb-4">
-                        <Form.Label>
-                            Title*
-                        </Form.Label>
-                        <Form.Control 
-                            type="text"
-                            placeholder="Title"
-                            isInvalid={!!errors.title}
-                            {...register("title", {required: "Required"})}
-                        />
-                        <Form.Control.Feedback>
-                            {errors.title?.message}
-                        </Form.Control.Feedback>
-                    </Form.Group>
+                    <TextFormFields
+                        name="title"
+                        label="Title"
+                        type="text"
+                        placeholder="Title"
+                        register={register}
+                        registerOptions={{required: "Required"}}
+                        error={errors.title}
+                    />
+                    <TextFormFields
+                        name="text"
+                        label="Text"
+                        as="textarea"
+                        rows={5}
+                        placeholder="Text"
+                        register={register}
+                    />
 
-                    <Form.Group className="mb-4">
-                        <Form.Label>
-                            Text
-                        </Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            rows={5}
-                            {...register("text")}
-                        />
-                    </Form.Group>
                 </Form>
             </Modal.Body>
             <Modal.Footer>
